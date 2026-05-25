@@ -1,15 +1,16 @@
+import { Badge, Card } from 'react-bootstrap';
 import Rating from './Rating';
 
 const Product = ({ product }) => {
     return (
-        <article className="product-card">
+        <Card className="product-card h-100">
             <div className="product-image-wrap">
-                <img src={product.image} alt={product.name} />
-                <span className="product-badge">{product.category}</span>
+                <Card.Img src={product.image} alt={product.name} />
+                <Badge className="product-badge">{product.category}</Badge>
             </div>
-            <div className="product-body">
-                <h3>{product.name}</h3>
-                <p>{product.description}</p>
+            <Card.Body>
+                <Card.Title as="h3">{product.name}</Card.Title>
+                <Card.Text>{product.description}</Card.Text>
                 <div className="beer-meta">
                     <span>{product.style}</span>
                     <span>{product.strength}</span>
@@ -20,8 +21,8 @@ const Product = ({ product }) => {
                     <strong>{product.price.toFixed(2)} RSD</strong>
                     <span>{product.countInStock > 0 ? `${product.countInStock} na stanju` : 'Nema na stanju'}</span>
                 </div>
-            </div>
-        </article>
+            </Card.Body>
+        </Card>
     );
 };
 

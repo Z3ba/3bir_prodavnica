@@ -1,9 +1,13 @@
+import { Container } from 'react-bootstrap';
+
 const Footer = () => {
     const currentYear = new Date().getFullYear();
 
     return (
         <footer className="site-footer">
-            <p>&copy; {currentYear} 3Bir Prodavnica. Sva prava zadrzana.</p>
+            <Container>
+                <p>&copy; {currentYear} 3Bir Prodavnica. Sva prava zadrzana.</p>
+            </Container>
         </footer>
     );
 };
