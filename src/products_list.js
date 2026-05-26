@@ -13,6 +13,14 @@ const products = [
         countInStock: 48,
         rating: 4.7,
         numReviews: 31,
+        reviews: [
+            {
+                name: 'Marko',
+                rating: 5,
+                comment: 'Odlicno osvezavajuce pivo, citrus se bas lepo oseca.',
+                image: '',
+            },
+        ],
     },
     {
         _id: '2',
@@ -28,6 +36,14 @@ const products = [
         countInStock: 32,
         rating: 4.9,
         numReviews: 44,
+        reviews: [
+            {
+                name: 'Nikola',
+                rating: 5,
+                comment: 'Pun ukus i dobra gorcina, pravo pivo za IPA ljubitelje.',
+                image: '',
+            },
+        ],
     },
     {
         _id: '3',
@@ -43,6 +59,14 @@ const products = [
         countInStock: 21,
         rating: 4.8,
         numReviews: 27,
+        reviews: [
+            {
+                name: 'Jovana',
+                rating: 5,
+                comment: 'Lagano i pitko, super uz veceru.',
+                image: '',
+            },
+        ],
     },
     {
         _id: '4',
@@ -58,6 +82,7 @@ const products = [
         countInStock: 37,
         rating: 4.6,
         numReviews: 19,
+        reviews: [],
     },
     {
         _id: '5',
@@ -73,6 +98,7 @@ const products = [
         countInStock: 18,
         rating: 4.5,
         numReviews: 16,
+        reviews: [],
     },
     {
         _id: '6',
@@ -88,6 +114,7 @@ const products = [
         countInStock: 54,
         rating: 4.4,
         numReviews: 12,
+        reviews: [],
     },
 ];
 
