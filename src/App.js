@@ -9,6 +9,7 @@ import CartScreen from './screens/CartScreen';
 import ShippingScreen from './screens/ShippingScreen';
 import PaymentScreen from './screens/PaymentScreen';
 import PlaceOrderScreen from './screens/PlaceOrderScreen';
+import AdminScreen from './screens/AdminScreen';
 import './App.css';
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
             <Route path="/shipping" element={<ShippingScreen />} />
             <Route path="/payment" element={<PaymentScreen />} />
             <Route path="/placeorder" element={<PlaceOrderScreen />} />
+            <Route path="/admin" element={<AdminScreen />} />
           </Routes>
         </Container>
         <Footer />

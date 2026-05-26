@@ -23,6 +23,7 @@ const Header = () => {
                 <Navbar.Collapse id="main-nav">
                     <Nav className="ms-auto">
                         <Nav.Link as={Link} to="/">Katalog</Nav.Link>
+                        <Nav.Link as={Link} to="/admin">Admin</Nav.Link>
                         <Nav.Link as={Link} to="/cart">
                             Korpa
                             {itemsCount > 0 && (

@@ -221,7 +221,9 @@
 }
 
 .checkout-card,
-.form-card {
+.form-card,
+.admin-card,
+.admin-stat {
   background: #ffffff;
   border: 1px solid #d7e2f1;
   border-radius: 8px;
@@ -230,6 +232,17 @@
 .form-card {
   max-width: 640px;
   margin: 0 auto;
+}
+
+.admin-stat span {
+  display: block;
+  color: #526072;
+  font-weight: 700;
+}
+
+.admin-stat strong {
+  color: #05070d;
+  font-size: 2rem;
 }
 
 .detail-image {
