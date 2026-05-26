@@ -220,6 +220,18 @@
   border-radius: 8px;
 }
 
+.checkout-card,
+.form-card {
+  background: #ffffff;
+  border: 1px solid #d7e2f1;
+  border-radius: 8px;
+}
+
+.form-card {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
 .detail-image {
   max-height: 460px;
   object-fit: contain;

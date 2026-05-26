@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Badge, Button, Card, Col, Form, Image, ListGroup, Row } from 'react-bootstrap';
+import { Alert, Badge, Button, Card, Col, Form, Image, ListGroup, Row } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
 import Rating from '../components/Rating';
+import { useCart } from '../context/CartContext';
 import products from '../products_list';
 
 const ProductScreen = () => {
@@ -11,6 +12,8 @@ const ProductScreen = () => {
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState('');
     const [comments, setComments] = useState(product?.reviews || []);
+    const [addedToCart, setAddedToCart] = useState(false);
+    const { addToCart } = useCart();
 
     const submitCommentHandler = (event) => {
         event.preventDefault();
@@ -70,6 +73,12 @@ const ProductScreen = () => {
                                 <ListGroup.Item><strong>Stanje:</strong> {product.countInStock} komada</ListGroup.Item>
                             </ListGroup>
 
+                            {addedToCart && (
+                                <Alert variant="success">
+                                    Proizvod je dodat u korpu.
+                                </Alert>
+                            )}
+
                             <div className="detail-buy-box">
                                 <strong>{product.price.toFixed(2)} RSD</strong>
                                 <Form.Select
@@ -81,7 +90,14 @@ const ProductScreen = () => {
                                         <option key={x + 1} value={x + 1}>{x + 1}</option>
                                     ))}
                                 </Form.Select>
-                                <Button variant="primary" disabled={product.countInStock === 0}>
+                                <Button
+                                    variant="primary"
+                                    disabled={product.countInStock === 0}
+                                    onClick={() => {
+                                        addToCart(product, qty);
+                                        setAddedToCart(true);
+                                    }}
+                                >
                                     Dodaj u korpu
                                 </Button>
                             </div>

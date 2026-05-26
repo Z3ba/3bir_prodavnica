@@ -1,0 +1,93 @@
+import { Button, Card, Col, ListGroup, Row } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+
+const PlaceOrderScreen = () => {
+    const navigate = useNavigate();
+    const { cartItems, itemsPrice, clearCart } = useCart();
+    const shippingAddress = JSON.parse(localStorage.getItem('shippingAddress') || '{}');
+    const paymentMethod = localStorage.getItem('paymentMethod') || 'Online placanje';
+    const shippingPrice = itemsPrice > 5000 ? 0 : 300;
+    const totalPrice = itemsPrice + shippingPrice;
+
+    const placeOrderHandler = () => {
+        const order = {
+            id: Date.now(),
+            items: cartItems,
+            shippingAddress,
+            paymentMethod,
+            totalPrice,
+        };
+
+        localStorage.setItem('lastOrder', JSON.stringify(order));
+        clearCart();
+        navigate('/');
+    };
+
+    return (
+        <Row className="g-4">
+            <Col md={8}>
+                <Card className="mb-3">
+                    <Card.Body>
+                        <h2>Podaci za dostavu</h2>
+                        <p className="mb-0">
+                            {shippingAddress.fullName}<br />
+                            {shippingAddress.address}, {shippingAddress.city}<br />
+                            {shippingAddress.phone}
+                        </p>
+                    </Card.Body>
+                </Card>
+
+                <Card className="mb-3">
+                    <Card.Body>
+                        <h2>Nacin placanja</h2>
+                        <p className="mb-0">{paymentMethod}</p>
+                    </Card.Body>
+                </Card>
+
+                <Card>
+                    <Card.Body>
+                        <h2>Proizvodi</h2>
+                        {cartItems.length === 0 ? (
+                            <p>Korpa je prazna.</p>
+                        ) : (
+                            <ListGroup variant="flush">
+                                {cartItems.map((item) => (
+                                    <ListGroup.Item key={item._id}>
+                                        <Link to={`/product/${item._id}`}>{item.name}</Link>
+                                        <span className="float-end">
+                                            {item.qty} x {item.price.toFixed(2)} RSD
+                                        </span>
+                                    </ListGroup.Item>
+                                ))}
+                            </ListGroup>
+                        )}
+                    </Card.Body>
+                </Card>
+            </Col>
+
+            <Col md={4}>
+                <Card className="checkout-card">
+                    <Card.Body>
+                        <h2>Pregled</h2>
+                        <ListGroup variant="flush" className="mb-3">
+                            <ListGroup.Item>Proizvodi: {itemsPrice.toFixed(2)} RSD</ListGroup.Item>
+                            <ListGroup.Item>Dostava: {shippingPrice.toFixed(2)} RSD</ListGroup.Item>
+                            <ListGroup.Item><strong>Ukupno: {totalPrice.toFixed(2)} RSD</strong></ListGroup.Item>
+                        </ListGroup>
+                        <Button
+                            className="w-100"
+                            variant="primary"
+                            disabled={cartItems.length === 0}
+                            onClick={placeOrderHandler}
+                        >
+                            Potvrdi porudzbinu
+                        </Button>
+                    </Card.Body>
+                </Card>
+            </Col>
+        </Row>
+    );
+};
+
+export default PlaceOrderScreen;
