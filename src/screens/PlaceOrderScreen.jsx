@@ -7,7 +7,9 @@ const PlaceOrderScreen = () => {
     const { cartItems, itemsPrice, clearCart } = useCart();
     const shippingAddress = JSON.parse(localStorage.getItem('shippingAddress') || '{}');
     const paymentMethod = localStorage.getItem('paymentMethod') || 'Online placanje';
-    const shippingPrice = itemsPrice > 5000 ? 0 : 300;
+    const pickupLocation = localStorage.getItem('pickupLocation');
+    const isLocalPickup = paymentMethod === 'Placanje u lokalu';
+    const shippingPrice = isLocalPickup || itemsPrice > 5000 ? 0 : 300;
     const totalPrice = itemsPrice + shippingPrice;
 
     const placeOrderHandler = () => {
@@ -16,6 +18,8 @@ const PlaceOrderScreen = () => {
             items: cartItems,
             shippingAddress,
             paymentMethod,
+            pickupLocation: isLocalPickup ? pickupLocation : '',
+            deliveryType: isLocalPickup ? 'Preuzimanje u lokalu' : 'Dostava',
             totalPrice,
         };
 
@@ -29,12 +33,19 @@ const PlaceOrderScreen = () => {
             <Col md={8}>
                 <Card className="mb-3">
                     <Card.Body>
-                        <h2>Podaci za dostavu</h2>
-                        <p className="mb-0">
-                            {shippingAddress.fullName}<br />
-                            {shippingAddress.address}, {shippingAddress.city}<br />
-                            {shippingAddress.phone}
-                        </p>
+                        <h2>{isLocalPickup ? 'Preuzimanje u lokalu' : 'Podaci za dostavu'}</h2>
+                        {isLocalPickup ? (
+                            <p className="mb-0">
+                                {pickupLocation}<br />
+                                Porudzbina se ne dostavlja, preuzimate je u izabranom lokalu.
+                            </p>
+                        ) : (
+                            <p className="mb-0">
+                                {shippingAddress.fullName}<br />
+                                {shippingAddress.address}, {shippingAddress.city}<br />
+                                {shippingAddress.phone}
+                            </p>
+                        )}
                     </Card.Body>
                 </Card>
 
@@ -72,7 +83,9 @@ const PlaceOrderScreen = () => {
                         <h2>Pregled</h2>
                         <ListGroup variant="flush" className="mb-3">
                             <ListGroup.Item>Proizvodi: {itemsPrice.toFixed(2)} RSD</ListGroup.Item>
-                            <ListGroup.Item>Dostava: {shippingPrice.toFixed(2)} RSD</ListGroup.Item>
+                            <ListGroup.Item>
+                                {isLocalPickup ? 'Preuzimanje u lokalu' : 'Dostava'}: {shippingPrice.toFixed(2)} RSD
+                            </ListGroup.Item>
                             <ListGroup.Item><strong>Ukupno: {totalPrice.toFixed(2)} RSD</strong></ListGroup.Item>
                         </ListGroup>
                         <Button

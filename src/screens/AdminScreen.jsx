@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { Badge, Button, Card, Col, Form, Row, Table } from 'react-bootstrap';
 import products from '../products_list';
 
-const mockUsers = [
+const users = [
     { id: 1, name: 'Marko Markovic', email: 'marko@email.com', role: 'korisnik' },
     { id: 2, name: 'Jovana Jovanovic', email: 'jovana@email.com', role: 'korisnik' },
     { id: 3, name: 'Admin 3Bir', email: 'admin@3bir.rs', role: 'administrator' },
 ];
 
-const mockOrders = [
+const orders = [
     { id: 1001, customer: 'Marko Markovic', total: 1020, status: 'Nova', payment: 'Pouzecem' },
     { id: 1002, customer: 'Jovana Jovanovic', total: 740, status: 'Placena', payment: 'Online placanje' },
     { id: 1003, customer: 'Nikola Nikolic', total: 390, status: 'Preuzimanje', payment: 'Placanje u lokalu' },
@@ -98,7 +98,7 @@ const AdminScreen = () => {
                     <Card className="admin-stat">
                         <Card.Body>
                             <span>Korisnici</span>
-                            <strong>{mockUsers.length}</strong>
+                            <strong>{users.length}</strong>
                         </Card.Body>
                     </Card>
                 </Col>
@@ -106,7 +106,7 @@ const AdminScreen = () => {
                     <Card className="admin-stat">
                         <Card.Body>
                             <span>Porudzbine</span>
-                            <strong>{mockOrders.length}</strong>
+                            <strong>{orders.length}</strong>
                         </Card.Body>
                     </Card>
                 </Col>
@@ -271,7 +271,7 @@ const AdminScreen = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {mockUsers.map((user) => (
+                                    {users.map((user) => (
                                         <tr key={user.id}>
                                             <td>{user.name}</td>
                                             <td>{user.email}</td>
@@ -302,7 +302,7 @@ const AdminScreen = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {mockOrders.map((order) => (
+                                    {orders.map((order) => (
                                         <tr key={order.id}>
                                             <td>#{order.id}</td>
                                             <td>{order.customer}</td>

@@ -51,7 +51,7 @@ const HomeScreen = () => {
                     </div>
                     <div>
                         <strong>3</strong>
-                        <span>nacina placanja uskoro</span>
+                        <span>nacina placanja</span>
                     </div>
                 </div>
             </section>

@@ -10,6 +10,7 @@ const ProductScreen = () => {
     const product = products.find((item) => item._id === id);
     const [qty, setQty] = useState(1);
     const [rating, setRating] = useState(5);
+    const [hoverRating, setHoverRating] = useState(0);
     const [comment, setComment] = useState('');
     const [comments, setComments] = useState(product?.reviews || []);
     const [addedToCart, setAddedToCart] = useState(false);
@@ -137,16 +138,26 @@ const ProductScreen = () => {
                             <Form onSubmit={submitCommentHandler}>
                                 <Form.Group className="mb-3" controlId="rating">
                                     <Form.Label>Ocena</Form.Label>
-                                    <Form.Select
-                                        value={rating}
-                                        onChange={(event) => setRating(Number(event.target.value))}
+                                    <div
+                                        className="review-rating-input"
+                                        onMouseLeave={() => setHoverRating(0)}
                                     >
-                                        <option value={5}>5 zvezdica</option>
-                                        <option value={4}>4 zvezdice</option>
-                                        <option value={3}>3 zvezdice</option>
-                                        <option value={2}>2 zvezdice</option>
-                                        <option value={1}>1 zvezdica</option>
-                                    </Form.Select>
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <button
+                                                aria-label={`${star} od 5 zvezdica`}
+                                                className={star <= (hoverRating || rating) ? 'active' : ''}
+                                                key={star}
+                                                onClick={() => setRating(star)}
+                                                onMouseEnter={() => setHoverRating(star)}
+                                                type="button"
+                                            >
+                                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                                    <polygon points="12 2 14.9 8.6 22 9.2 16.6 13.8 18.2 20.8 12 17.1 5.8 20.8 7.4 13.8 2 9.2 9.1 8.6" />
+                                                </svg>
+                                            </button>
+                                        ))}
+                                        <span>{rating} od 5</span>
+                                    </div>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="comment">
                                     <Form.Label>Komentar</Form.Label>
