@@ -28,6 +28,16 @@
   line-height: 1.1;
 }
 
+.logout-link {
+  color: rgba(255, 255, 255, 0.75) !important;
+  background: transparent;
+  border: 0;
+}
+
+.logout-link:hover {
+  color: #ffffff !important;
+}
+
 .home-hero {
   display: grid;
   grid-template-columns: minmax(0, 1.5fr) minmax(220px, 0.7fr);
@@ -462,6 +472,31 @@
   font-size: 2rem;
 }
 
+.admin-tabs .nav-link {
+  color: #10213a;
+  font-weight: 800;
+}
+
+.admin-tabs .nav-link.active {
+  color: #1d6fe8;
+}
+
+.admin-table-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.admin-table-heading h2 {
+  margin: 0;
+}
+
+.admin-table-heading .form-control {
+  max-width: 280px;
+}
+
 .detail-image {
   max-height: 460px;
   object-fit: contain;
@@ -504,5 +539,14 @@
 
   .detail-buy-box {
     grid-template-columns: 1fr;
+  }
+
+  .admin-table-heading {
+    display: block;
+  }
+
+  .admin-table-heading .form-control {
+    max-width: none;
+    margin-top: 10px;
   }
 }

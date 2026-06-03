@@ -3,9 +3,9 @@ import { Button, Card, Col, Form, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 const pickupLocations = [
-    'TapRoom--Futoski put 12',
-    'CheckPoint Grbavic--Brace Ribnikar 1',
-    'CheckPoint Centar--Njegoseva 4',
+    'TapRoom 3bir--Futoski put 12',
+    'CheckPoint 3bir Grbavic--Brace Ribnikar 1',
+    'CheckPoint 3bir Centar--Njegoseva 4',
     'Stribor 3bir--Branka Bajica 2',
 ];
 

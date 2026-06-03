@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Badge, Button, Card, Col, Form, Row, Table } from 'react-bootstrap';
+import { Badge, Button, Card, Col, Form, Row, Tab, Table, Tabs } from 'react-bootstrap';
 import products from '../products_list';
 
 const users = [
@@ -28,6 +28,46 @@ const AdminScreen = () => {
     const [adminProducts, setAdminProducts] = useState(products);
     const [formProduct, setFormProduct] = useState(emptyProduct);
     const [editingId, setEditingId] = useState(null);
+    const [productSearch, setProductSearch] = useState('');
+    const [userSearch, setUserSearch] = useState('');
+    const [orderSearch, setOrderSearch] = useState('');
+
+    const filteredProducts = adminProducts.filter((product) => {
+        const search = productSearch.trim().toLowerCase();
+        const searchableText = [
+            product.name,
+            product.category,
+            product.style,
+            product.taste,
+            product.strength,
+        ].join(' ').toLowerCase();
+
+        return !search || searchableText.includes(search);
+    });
+
+    const filteredUsers = users.filter((user) => {
+        const search = userSearch.trim().toLowerCase();
+        const searchableText = [
+            user.name,
+            user.email,
+            user.role,
+        ].join(' ').toLowerCase();
+
+        return !search || searchableText.includes(search);
+    });
+
+    const filteredOrders = orders.filter((order) => {
+        const search = orderSearch.trim().toLowerCase();
+        const searchableText = [
+            order.id,
+            order.customer,
+            order.status,
+            order.payment,
+            order.total,
+        ].join(' ').toLowerCase();
+
+        return !search || searchableText.includes(search);
+    });
 
     const submitHandler = (event) => {
         event.preventDefault();
@@ -112,156 +152,177 @@ const AdminScreen = () => {
                 </Col>
             </Row>
 
-            <Row className="g-4">
-                <Col lg={5}>
-                    <Card className="admin-card">
-                        <Card.Body>
-                            <h2>{editingId ? 'Izmeni pivo' : 'Dodaj novo pivo'}</h2>
-                            <Form onSubmit={submitHandler}>
-                                <Form.Group className="mb-3" controlId="name">
-                                    <Form.Label>Naziv</Form.Label>
-                                    <Form.Control
-                                        value={formProduct.name}
-                                        onChange={(event) => setFormProduct({ ...formProduct, name: event.target.value })}
-                                        required
-                                    />
-                                </Form.Group>
-                                <Row>
-                                    <Col md={6}>
-                                        <Form.Group className="mb-3" controlId="category">
-                                            <Form.Label>Vrsta</Form.Label>
+            <Tabs defaultActiveKey="products" className="admin-tabs mb-3">
+                <Tab eventKey="products" title="Proizvodi">
+                    <Row className="g-4">
+                        <Col lg={5}>
+                            <Card className="admin-card">
+                                <Card.Body>
+                                    <h2>{editingId ? 'Izmeni pivo' : 'Dodaj novo pivo'}</h2>
+                                    <Form onSubmit={submitHandler}>
+                                        <Form.Group className="mb-3" controlId="name">
+                                            <Form.Label>Naziv</Form.Label>
                                             <Form.Control
-                                                value={formProduct.category}
-                                                onChange={(event) => setFormProduct({ ...formProduct, category: event.target.value })}
+                                                value={formProduct.name}
+                                                onChange={(event) => setFormProduct({ ...formProduct, name: event.target.value })}
                                                 required
                                             />
                                         </Form.Group>
-                                    </Col>
-                                    <Col md={6}>
-                                        <Form.Group className="mb-3" controlId="style">
-                                            <Form.Label>Stil</Form.Label>
-                                            <Form.Control
-                                                value={formProduct.style}
-                                                onChange={(event) => setFormProduct({ ...formProduct, style: event.target.value })}
-                                                required
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col md={6}>
-                                        <Form.Group className="mb-3" controlId="strength">
-                                            <Form.Label>Jacina</Form.Label>
-                                            <Form.Control
-                                                value={formProduct.strength}
-                                                placeholder="5.5%"
-                                                onChange={(event) => setFormProduct({ ...formProduct, strength: event.target.value })}
-                                                required
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                    <Col md={6}>
-                                        <Form.Group className="mb-3" controlId="taste">
-                                            <Form.Label>Ukus</Form.Label>
-                                            <Form.Control
-                                                value={formProduct.taste}
-                                                onChange={(event) => setFormProduct({ ...formProduct, taste: event.target.value })}
-                                                required
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col md={6}>
-                                        <Form.Group className="mb-3" controlId="price">
-                                            <Form.Label>Cena</Form.Label>
-                                            <Form.Control
-                                                type="number"
-                                                value={formProduct.price}
-                                                onChange={(event) => setFormProduct({ ...formProduct, price: event.target.value })}
-                                                required
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                    <Col md={6}>
-                                        <Form.Group className="mb-3" controlId="stock">
-                                            <Form.Label>Stanje</Form.Label>
-                                            <Form.Control
-                                                type="number"
-                                                value={formProduct.countInStock}
-                                                onChange={(event) => setFormProduct({ ...formProduct, countInStock: event.target.value })}
-                                                required
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-                                <div className="d-flex gap-2">
-                                    <Button type="submit" variant="primary">
-                                        {editingId ? 'Sacuvaj izmene' : 'Dodaj pivo'}
-                                    </Button>
-                                    {editingId && (
-                                        <Button
-                                            type="button"
-                                            variant="outline-secondary"
-                                            onClick={() => {
-                                                setEditingId(null);
-                                                setFormProduct(emptyProduct);
-                                            }}
-                                        >
-                                            Odustani
-                                        </Button>
+                                        <Row>
+                                            <Col md={6}>
+                                                <Form.Group className="mb-3" controlId="category">
+                                                    <Form.Label>Vrsta</Form.Label>
+                                                    <Form.Control
+                                                        value={formProduct.category}
+                                                        onChange={(event) => setFormProduct({ ...formProduct, category: event.target.value })}
+                                                        required
+                                                    />
+                                                </Form.Group>
+                                            </Col>
+                                            <Col md={6}>
+                                                <Form.Group className="mb-3" controlId="style">
+                                                    <Form.Label>Stil</Form.Label>
+                                                    <Form.Control
+                                                        value={formProduct.style}
+                                                        onChange={(event) => setFormProduct({ ...formProduct, style: event.target.value })}
+                                                        required
+                                                    />
+                                                </Form.Group>
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col md={6}>
+                                                <Form.Group className="mb-3" controlId="strength">
+                                                    <Form.Label>Jacina</Form.Label>
+                                                    <Form.Control
+                                                        value={formProduct.strength}
+                                                        placeholder="5.5%"
+                                                        onChange={(event) => setFormProduct({ ...formProduct, strength: event.target.value })}
+                                                        required
+                                                    />
+                                                </Form.Group>
+                                            </Col>
+                                            <Col md={6}>
+                                                <Form.Group className="mb-3" controlId="taste">
+                                                    <Form.Label>Ukus</Form.Label>
+                                                    <Form.Control
+                                                        value={formProduct.taste}
+                                                        onChange={(event) => setFormProduct({ ...formProduct, taste: event.target.value })}
+                                                        required
+                                                    />
+                                                </Form.Group>
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col md={6}>
+                                                <Form.Group className="mb-3" controlId="price">
+                                                    <Form.Label>Cena</Form.Label>
+                                                    <Form.Control
+                                                        type="number"
+                                                        value={formProduct.price}
+                                                        onChange={(event) => setFormProduct({ ...formProduct, price: event.target.value })}
+                                                        required
+                                                    />
+                                                </Form.Group>
+                                            </Col>
+                                            <Col md={6}>
+                                                <Form.Group className="mb-3" controlId="stock">
+                                                    <Form.Label>Stanje</Form.Label>
+                                                    <Form.Control
+                                                        type="number"
+                                                        value={formProduct.countInStock}
+                                                        onChange={(event) => setFormProduct({ ...formProduct, countInStock: event.target.value })}
+                                                        required
+                                                    />
+                                                </Form.Group>
+                                            </Col>
+                                        </Row>
+                                        <div className="d-flex gap-2">
+                                            <Button type="submit" variant="primary">
+                                                {editingId ? 'Sacuvaj izmene' : 'Dodaj pivo'}
+                                            </Button>
+                                            {editingId && (
+                                                <Button
+                                                    type="button"
+                                                    variant="outline-secondary"
+                                                    onClick={() => {
+                                                        setEditingId(null);
+                                                        setFormProduct(emptyProduct);
+                                                    }}
+                                                >
+                                                    Odustani
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </Form>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+
+                        <Col lg={7}>
+                            <Card className="admin-card">
+                                <Card.Body>
+                                    <div className="admin-table-heading">
+                                        <h2>Proizvodi</h2>
+                                        <Form.Control
+                                            type="search"
+                                            value={productSearch}
+                                            placeholder="Pretrazi proizvode"
+                                            onChange={(event) => setProductSearch(event.target.value)}
+                                        />
+                                    </div>
+                                    <Table responsive hover>
+                                        <thead>
+                                            <tr>
+                                                <th>Naziv</th>
+                                                <th>Vrsta</th>
+                                                <th>Cena</th>
+                                                <th>Stanje</th>
+                                                <th>Akcije</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {filteredProducts.map((product) => (
+                                                <tr key={product._id}>
+                                                    <td>{product.name}</td>
+                                                    <td>{product.category}</td>
+                                                    <td>{Number(product.price).toFixed(2)} RSD</td>
+                                                    <td>{product.countInStock}</td>
+                                                    <td>
+                                                        <div className="d-flex gap-2">
+                                                            <Button size="sm" variant="outline-primary" onClick={() => editProductHandler(product)}>
+                                                                Izmeni
+                                                            </Button>
+                                                            <Button size="sm" variant="outline-danger" onClick={() => deleteProductHandler(product._id)}>
+                                                                Obrisi
+                                                            </Button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </Table>
+                                    {filteredProducts.length === 0 && (
+                                        <p className="text-muted mb-0">Nema proizvoda za ovu pretragu.</p>
                                     )}
-                                </div>
-                            </Form>
-                        </Card.Body>
-                    </Card>
-                </Col>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    </Row>
+                </Tab>
 
-                <Col lg={7}>
+                <Tab eventKey="users" title="Korisnici">
                     <Card className="admin-card">
                         <Card.Body>
-                            <h2>Proizvodi</h2>
-                            <Table responsive hover>
-                                <thead>
-                                    <tr>
-                                        <th>Naziv</th>
-                                        <th>Vrsta</th>
-                                        <th>Cena</th>
-                                        <th>Stanje</th>
-                                        <th>Akcije</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {adminProducts.map((product) => (
-                                        <tr key={product._id}>
-                                            <td>{product.name}</td>
-                                            <td>{product.category}</td>
-                                            <td>{Number(product.price).toFixed(2)} RSD</td>
-                                            <td>{product.countInStock}</td>
-                                            <td>
-                                                <div className="d-flex gap-2">
-                                                    <Button size="sm" variant="outline-primary" onClick={() => editProductHandler(product)}>
-                                                        Izmeni
-                                                    </Button>
-                                                    <Button size="sm" variant="outline-danger" onClick={() => deleteProductHandler(product._id)}>
-                                                        Obrisi
-                                                    </Button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </Table>
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
-
-            <Row className="g-4 mt-1">
-                <Col lg={6}>
-                    <Card className="admin-card">
-                        <Card.Body>
-                            <h2>Korisnici</h2>
+                            <div className="admin-table-heading">
+                                <h2>Korisnici</h2>
+                                <Form.Control
+                                    type="search"
+                                    value={userSearch}
+                                    placeholder="Pretrazi korisnike"
+                                    onChange={(event) => setUserSearch(event.target.value)}
+                                />
+                            </div>
                             <Table responsive hover>
                                 <thead>
                                     <tr>
@@ -271,7 +332,7 @@ const AdminScreen = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {users.map((user) => (
+                                    {filteredUsers.map((user) => (
                                         <tr key={user.id}>
                                             <td>{user.name}</td>
                                             <td>{user.email}</td>
@@ -284,14 +345,25 @@ const AdminScreen = () => {
                                     ))}
                                 </tbody>
                             </Table>
+                            {filteredUsers.length === 0 && (
+                                <p className="text-muted mb-0">Nema korisnika za ovu pretragu.</p>
+                            )}
                         </Card.Body>
                     </Card>
-                </Col>
+                </Tab>
 
-                <Col lg={6}>
+                <Tab eventKey="orders" title="Porudzbine">
                     <Card className="admin-card">
                         <Card.Body>
-                            <h2>Porudzbine</h2>
+                            <div className="admin-table-heading">
+                                <h2>Porudzbine</h2>
+                                <Form.Control
+                                    type="search"
+                                    value={orderSearch}
+                                    placeholder="Pretrazi porudzbine"
+                                    onChange={(event) => setOrderSearch(event.target.value)}
+                                />
+                            </div>
                             <Table responsive hover>
                                 <thead>
                                     <tr>
@@ -302,7 +374,7 @@ const AdminScreen = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {orders.map((order) => (
+                                    {filteredOrders.map((order) => (
                                         <tr key={order.id}>
                                             <td>#{order.id}</td>
                                             <td>{order.customer}</td>
@@ -312,10 +384,13 @@ const AdminScreen = () => {
                                     ))}
                                 </tbody>
                             </Table>
+                            {filteredOrders.length === 0 && (
+                                <p className="text-muted mb-0">Nema porudzbina za ovu pretragu.</p>
+                            )}
                         </Card.Body>
                     </Card>
-                </Col>
-            </Row>
+                </Tab>
+            </Tabs>
         </>
     );
 };

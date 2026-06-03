@@ -94,7 +94,7 @@ const products = [
         style: 'Red IPA',
         strength: '6.5%',
         taste: 'Mango, tropsko voce, hmeljno',
-        price: 390.00,
+        price: 400.00,
         countInStock: 18,
         rating: 4.5,
         numReviews: 16,
