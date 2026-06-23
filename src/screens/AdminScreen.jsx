@@ -1,18 +1,6 @@
-import { useState } from 'react';
-import { Badge, Button, Card, Col, Form, Row, Tab, Table, Tabs } from 'react-bootstrap';
-import products from '../products_list';
-
-const users = [
-    { id: 1, name: 'Marko Markovic', email: 'marko@email.com', role: 'korisnik' },
-    { id: 2, name: 'Jovana Jovanovic', email: 'jovana@email.com', role: 'korisnik' },
-    { id: 3, name: 'Admin 3Bir', email: 'admin@3bir.rs', role: 'administrator' },
-];
-
-const orders = [
-    { id: 1001, customer: 'Marko Markovic', total: 1020, status: 'Nova', payment: 'Pouzecem' },
-    { id: 1002, customer: 'Jovana Jovanovic', total: 740, status: 'Placena', payment: 'Online placanje' },
-    { id: 1003, customer: 'Nikola Nikolic', total: 390, status: 'Preuzimanje', payment: 'Placanje u lokalu' },
-];
+import { useEffect, useState } from 'react';
+import { Alert, Badge, Button, Card, Col, Form, Row, Tab, Table, Tabs } from 'react-bootstrap';
+import { createProduct, deleteProduct, getOrders, getProducts, getUsers, markOrderDelivered, updateOrderStatus, updateProduct } from '../api';
 
 const emptyProduct = {
     name: '',
@@ -22,15 +10,46 @@ const emptyProduct = {
     taste: '',
     price: '',
     countInStock: '',
+    image: '',
+    description: '',
 };
 
 const AdminScreen = () => {
-    const [adminProducts, setAdminProducts] = useState(products);
+    const [adminProducts, setAdminProducts] = useState([]);
+    const [users, setUsers] = useState([]);
+    const [orders, setOrders] = useState([]);
     const [formProduct, setFormProduct] = useState(emptyProduct);
     const [editingId, setEditingId] = useState(null);
     const [productSearch, setProductSearch] = useState('');
     const [userSearch, setUserSearch] = useState('');
     const [orderSearch, setOrderSearch] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
+
+    const loadAdminData = async () => {
+        setLoading(true);
+        setError('');
+
+        try {
+            const [productsData, usersData, ordersData] = await Promise.all([
+                getProducts(),
+                getUsers(),
+                getOrders(),
+            ]);
+            setAdminProducts(productsData);
+            setUsers(usersData);
+            setOrders(ordersData);
+        } catch (err) {
+            setError(err.message || 'Admin podaci nisu ucitani');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadAdminData();
+    }, []);
 
     const filteredProducts = adminProducts.filter((product) => {
         const search = productSearch.trim().toLowerCase();
@@ -59,43 +78,45 @@ const AdminScreen = () => {
     const filteredOrders = orders.filter((order) => {
         const search = orderSearch.trim().toLowerCase();
         const searchableText = [
-            order.id,
-            order.customer,
+            order._id,
+            order.user?.name,
+            order.user?.email,
             order.status,
-            order.payment,
-            order.total,
+            order.paymentMethod,
+            order.totalPrice,
         ].join(' ').toLowerCase();
 
         return !search || searchableText.includes(search);
     });
 
-    const submitHandler = (event) => {
+    const submitHandler = async (event) => {
         event.preventDefault();
+        setError('');
+        setMessage('');
 
         const productData = {
             ...formProduct,
             price: Number(formProduct.price),
             countInStock: Number(formProduct.countInStock),
-            image: 'https://media2.3bir.rs/2018/12/3Bir-Logo-web.png',
-            description: `${formProduct.name} - novo pivo u 3Bir admin katalogu.`,
-            rating: 0,
-            numReviews: 0,
-            reviews: [],
+            image: formProduct.image || 'https://media2.3bir.rs/2018/12/3Bir-Logo-web.png',
+            description: formProduct.description || `${formProduct.name} - pivo u 3Bir katalogu.`,
         };
 
-        if (editingId) {
-            setAdminProducts((items) =>
-                items.map((item) => item._id === editingId ? { ...item, ...productData, _id: editingId } : item)
-            );
-        } else {
-            setAdminProducts((items) => [
-                ...items,
-                { ...productData, _id: String(Date.now()) },
-            ]);
-        }
+        try {
+            if (editingId) {
+                await updateProduct(editingId, productData);
+                setMessage('Pivo je izmenjeno.');
+            } else {
+                await createProduct(productData);
+                setMessage('Pivo je dodato.');
+            }
 
-        setEditingId(null);
-        setFormProduct(emptyProduct);
+            setEditingId(null);
+            setFormProduct(emptyProduct);
+            await loadAdminData();
+        } catch (err) {
+            setError(err.message || 'Pivo nije sacuvano');
+        }
     };
 
     const editProductHandler = (product) => {
@@ -108,11 +129,48 @@ const AdminScreen = () => {
             taste: product.taste,
             price: product.price,
             countInStock: product.countInStock,
+            image: product.image,
+            description: product.description,
         });
     };
 
-    const deleteProductHandler = (productId) => {
-        setAdminProducts((items) => items.filter((item) => item._id !== productId));
+    const deleteProductHandler = async (productId) => {
+        setError('');
+        setMessage('');
+
+        try {
+            await deleteProduct(productId);
+            setMessage('Pivo je obrisano.');
+            await loadAdminData();
+        } catch (err) {
+            setError(err.message || 'Pivo nije obrisano');
+        }
+    };
+
+    const statusHandler = async (orderId, status) => {
+        setError('');
+        setMessage('');
+
+        try {
+            await updateOrderStatus(orderId, status);
+            setMessage('Status porudzbine je izmenjen.');
+            await loadAdminData();
+        } catch (err) {
+            setError(err.message || 'Status nije izmenjen');
+        }
+    };
+
+    const deliverHandler = async (orderId) => {
+        setError('');
+        setMessage('');
+
+        try {
+            await markOrderDelivered(orderId);
+            setMessage('Porudzbina je oznacena kao isporucena.');
+            await loadAdminData();
+        } catch (err) {
+            setError(err.message || 'Porudzbina nije izmenjena');
+        }
     };
 
     return (
@@ -124,6 +182,10 @@ const AdminScreen = () => {
                 </div>
                 <p>Pregled proizvoda, korisnika i porudzbina.</p>
             </div>
+
+            {loading && <Alert variant="info">Ucitavanje admin podataka...</Alert>}
+            {message && <Alert variant="success">{message}</Alert>}
+            {error && <Alert variant="danger">{error}</Alert>}
 
             <Row className="g-3 mb-4">
                 <Col md={4}>
@@ -213,6 +275,22 @@ const AdminScreen = () => {
                                                 </Form.Group>
                                             </Col>
                                         </Row>
+                                        <Form.Group className="mb-3" controlId="description">
+                                            <Form.Label>Opis</Form.Label>
+                                            <Form.Control
+                                                as="textarea"
+                                                rows={3}
+                                                value={formProduct.description}
+                                                onChange={(event) => setFormProduct({ ...formProduct, description: event.target.value })}
+                                            />
+                                        </Form.Group>
+                                        <Form.Group className="mb-3" controlId="image">
+                                            <Form.Label>Slika URL</Form.Label>
+                                            <Form.Control
+                                                value={formProduct.image}
+                                                onChange={(event) => setFormProduct({ ...formProduct, image: event.target.value })}
+                                            />
+                                        </Form.Group>
                                         <Row>
                                             <Col md={6}>
                                                 <Form.Group className="mb-3" controlId="price">
@@ -333,12 +411,12 @@ const AdminScreen = () => {
                                 </thead>
                                 <tbody>
                                     {filteredUsers.map((user) => (
-                                        <tr key={user.id}>
+                                        <tr key={user._id}>
                                             <td>{user.name}</td>
                                             <td>{user.email}</td>
                                             <td>
-                                                <Badge bg={user.role === 'administrator' ? 'primary' : 'secondary'}>
-                                                    {user.role}
+                                                <Badge bg={user.isAdmin ? 'primary' : 'secondary'}>
+                                                    {user.role || (user.isAdmin ? 'administrator' : 'korisnik')}
                                                 </Badge>
                                             </td>
                                         </tr>
@@ -371,15 +449,45 @@ const AdminScreen = () => {
                                         <th>Kupac</th>
                                         <th>Ukupno</th>
                                         <th>Status</th>
+                                        <th>Akcije</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {filteredOrders.map((order) => (
-                                        <tr key={order.id}>
-                                            <td>#{order.id}</td>
-                                            <td>{order.customer}</td>
-                                            <td>{order.total.toFixed(2)} RSD</td>
-                                            <td>{order.status}</td>
+                                        <tr key={order._id}>
+                                            <td>#{order._id.slice(-6)}</td>
+                                            <td>{order.user?.name || 'Korisnik'}</td>
+                                            <td>{Number(order.totalPrice).toFixed(2)} RSD</td>
+                                            <td>
+                                                <Badge bg={order.isDelivered ? 'success' : 'primary'}>
+                                                    {order.status}
+                                                </Badge>
+                                            </td>
+                                            <td>
+                                                <div className="d-flex gap-2 flex-wrap">
+                                                    <Form.Select
+                                                        size="sm"
+                                                        value={order.status}
+                                                        onChange={(event) => statusHandler(order._id, event.target.value)}
+                                                    >
+                                                        <option>Nova</option>
+                                                        <option>Placena</option>
+                                                        <option>Preuzimanje</option>
+                                                        <option>U obradi</option>
+                                                        <option>Poslata</option>
+                                                        <option>Isporucena</option>
+                                                        <option>Otkazana</option>
+                                                    </Form.Select>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline-success"
+                                                        disabled={order.isDelivered}
+                                                        onClick={() => deliverHandler(order._id)}
+                                                    >
+                                                        Isporucena
+                                                    </Button>
+                                                </div>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
