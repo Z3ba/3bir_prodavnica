@@ -1,11 +1,29 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Button, Col, Form, Row } from 'react-bootstrap';
+import { getProducts } from '../api';
 import Product from '../components/Product';
-import products from '../products_list';
 
 const HomeScreen = () => {
+    const [products, setProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('Sve vrste');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        const loadProducts = async () => {
+            try {
+                const data = await getProducts();
+                setProducts(data);
+            } catch (err) {
+                setError(err.message || 'Proizvodi nisu ucitani');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadProducts();
+    }, []);
 
     const categories = ['Sve vrste', ...new Set(products.map((product) => product.category))];
 
@@ -64,6 +82,9 @@ const HomeScreen = () => {
                 <p>{filteredProducts.length} od {products.length} piva se prikazuje.</p>
             </div>
 
+            {error && <Alert variant="danger">{error}</Alert>}
+            {loading && <Alert variant="info">Ucitavanje kataloga...</Alert>}
+
             <Form className="catalog-toolbar mb-4">
                 <Row className="g-3 align-items-end">
                     <Col md={7}>
@@ -106,7 +127,7 @@ const HomeScreen = () => {
                 ))}
             </Row>
 
-            {filteredProducts.length === 0 && (
+            {!loading && filteredProducts.length === 0 && (
                 <Alert variant="warning" className="mt-4">
                     Nema piva za izabrane filtere.{' '}
                     <Button variant="link" className="p-0 align-baseline" onClick={resetFilters}>

@@ -1,10 +1,16 @@
-import { Button, Card, Col, ListGroup, Row } from 'react-bootstrap';
+import { useState } from 'react';
+import { Alert, Button, Card, Col, ListGroup, Row } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
+import { createOrder } from '../api';
+import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
 const PlaceOrderScreen = () => {
     const navigate = useNavigate();
     const { cartItems, itemsPrice, clearCart } = useCart();
+    const { userInfo } = useAuth();
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const shippingAddress = JSON.parse(localStorage.getItem('shippingAddress') || '{}');
     const paymentMethod = localStorage.getItem('paymentMethod') || 'Online placanje';
     const pickupLocation = localStorage.getItem('pickupLocation');
@@ -12,25 +18,48 @@ const PlaceOrderScreen = () => {
     const shippingPrice = isLocalPickup || itemsPrice > 5000 ? 0 : 300;
     const totalPrice = itemsPrice + shippingPrice;
 
-    const placeOrderHandler = () => {
-        const order = {
-            id: Date.now(),
-            items: cartItems,
-            shippingAddress,
-            paymentMethod,
-            pickupLocation: isLocalPickup ? pickupLocation : '',
-            deliveryType: isLocalPickup ? 'Preuzimanje u lokalu' : 'Dostava',
-            totalPrice,
-        };
+    const placeOrderHandler = async () => {
+        if (!userInfo) {
+            navigate('/login');
+            return;
+        }
 
-        localStorage.setItem('lastOrder', JSON.stringify(order));
-        clearCart();
-        navigate('/');
+        setError('');
+        setLoading(true);
+
+        try {
+            const order = await createOrder({
+                orderItems: cartItems.map((item) => ({
+                    name: item.name,
+                    qty: item.qty,
+                    image: item.image,
+                    price: item.price,
+                    product: item._id,
+                })),
+                shippingAddress,
+                paymentMethod,
+                pickupLocation: isLocalPickup ? pickupLocation : '',
+                deliveryType: isLocalPickup ? 'Preuzimanje u lokalu' : 'Dostava',
+                itemsPrice,
+                shippingPrice,
+                totalPrice,
+            });
+
+            localStorage.setItem('lastOrder', JSON.stringify(order));
+            clearCart();
+            navigate(`/order/${order._id}`);
+        } catch (err) {
+            setError(err.message || 'Porudzbina nije sacuvana');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <Row className="g-4">
             <Col md={8}>
+                {error && <Alert variant="danger">{error}</Alert>}
+                {!userInfo && <Alert variant="warning">Morate biti prijavljeni da potvrdite porudzbinu.</Alert>}
                 <Card className="mb-3">
                     <Card.Body>
                         <h2>{isLocalPickup ? 'Preuzimanje u lokalu' : 'Podaci za dostavu'}</h2>
@@ -91,10 +120,10 @@ const PlaceOrderScreen = () => {
                         <Button
                             className="w-100"
                             variant="primary"
-                            disabled={cartItems.length === 0}
+                            disabled={cartItems.length === 0 || loading}
                             onClick={placeOrderHandler}
                         >
-                            Potvrdi porudzbinu
+                            {loading ? 'Cuvanje...' : 'Potvrdi porudzbinu'}
                         </Button>
                     </Card.Body>
                 </Card>

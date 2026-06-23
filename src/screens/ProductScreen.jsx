@@ -1,40 +1,68 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, Badge, Button, Card, Col, Form, Image, ListGroup, Row } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
+import { createReview, getProduct } from '../api';
 import Rating from '../components/Rating';
+import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import products from '../products_list';
 
 const ProductScreen = () => {
     const { id } = useParams();
-    const product = products.find((item) => item._id === id);
+    const [product, setProduct] = useState(null);
     const [qty, setQty] = useState(1);
     const [rating, setRating] = useState(5);
     const [hoverRating, setHoverRating] = useState(0);
     const [comment, setComment] = useState('');
-    const [comments, setComments] = useState(product?.reviews || []);
     const [addedToCart, setAddedToCart] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [reviewMessage, setReviewMessage] = useState('');
     const { addToCart } = useCart();
+    const { userInfo } = useAuth();
 
-    const submitCommentHandler = (event) => {
+    const loadProduct = useCallback(async () => {
+        try {
+            const data = await getProduct(id);
+            setProduct(data);
+        } catch (err) {
+            setError(err.message || 'Pivo nije ucitano');
+        } finally {
+            setLoading(false);
+        }
+    }, [id]);
+
+    useEffect(() => {
+        loadProduct();
+    }, [loadProduct]);
+
+    const submitCommentHandler = async (event) => {
         event.preventDefault();
+        setReviewMessage('');
+        setError('');
 
         if (!comment.trim()) {
             return;
         }
 
-        setComments([
-            ...comments,
-            {
-                name: 'Registrovani korisnik',
-                rating,
-                comment,
-                image: '',
-            },
-        ]);
-        setRating(5);
-        setComment('');
+        if (!userInfo) {
+            setError('Morate biti prijavljeni da dodate komentar.');
+            return;
+        }
+
+        try {
+            await createReview(product._id, { rating, comment });
+            setReviewMessage('Komentar je sacuvan.');
+            setRating(5);
+            setComment('');
+            await loadProduct();
+        } catch (err) {
+            setError(err.message || 'Komentar nije sacuvan');
+        }
     };
+
+    if (loading) {
+        return <Alert variant="info">Ucitavanje piva...</Alert>;
+    }
 
     if (!product) {
         return (
@@ -42,6 +70,7 @@ const ProductScreen = () => {
                 <Link className="btn btn-outline-primary mb-3" to="/">Nazad na katalog</Link>
                 <Card className="p-4">
                     <h2>Pivo nije pronadjeno</h2>
+                    {error && <Alert variant="danger">{error}</Alert>}
                 </Card>
             </>
         );
@@ -50,6 +79,8 @@ const ProductScreen = () => {
     return (
         <>
             <Link className="btn btn-outline-primary mb-3" to="/">Nazad na katalog</Link>
+            {error && <Alert variant="danger">{error}</Alert>}
+            {reviewMessage && <Alert variant="success">{reviewMessage}</Alert>}
 
             <Row className="g-4">
                 <Col md={6}>
@@ -81,7 +112,7 @@ const ProductScreen = () => {
                             )}
 
                             <div className="detail-buy-box">
-                                <strong>{product.price.toFixed(2)} RSD</strong>
+                                <strong>{Number(product.price).toFixed(2)} RSD</strong>
                                 <Form.Select
                                     value={qty}
                                     disabled={product.countInStock === 0}
@@ -112,18 +143,15 @@ const ProductScreen = () => {
                     <Card className="detail-card">
                         <Card.Body>
                             <h2>Komentari</h2>
-                            {comments.length === 0 ? (
+                            {product.reviews.length === 0 ? (
                                 <p className="text-muted">Jos nema komentara za ovo pivo.</p>
                             ) : (
                                 <ListGroup variant="flush">
-                                    {comments.map((item, index) => (
-                                        <ListGroup.Item key={`${item.name}-${index}`}>
+                                    {product.reviews.map((item) => (
+                                        <ListGroup.Item key={item._id || `${item.name}-${item.comment}`}>
                                             <strong>{item.name}</strong>
                                             <Rating value={item.rating} text="" />
                                             <p className="mb-2">{item.comment}</p>
-                                            {item.image && (
-                                                <Image src={item.image} alt="Slika komentara" thumbnail className="comment-image" />
-                                            )}
                                         </ListGroup.Item>
                                     ))}
                                 </ListGroup>
