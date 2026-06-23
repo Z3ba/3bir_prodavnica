@@ -1,4 +1,5 @@
 import { createContext, useContext, useMemo, useState } from 'react';
+import { loginUser, logoutUser, registerUser } from '../api';
 
 const AuthContext = createContext(null);
 
@@ -10,19 +11,31 @@ const getSavedUser = () => {
 export const AuthProvider = ({ children }) => {
     const [userInfo, setUserInfo] = useState(getSavedUser);
 
-    const login = (email) => {
-        const normalizedEmail = email.trim().toLowerCase();
-        const user = {
-            email: normalizedEmail,
-            name: normalizedEmail.split('@')[0],
-            role: normalizedEmail === 'admin@3bir.rs' ? 'administrator' : 'korisnik',
-        };
-
+    const login = async (email, password) => {
+        const user = await loginUser({ email: email.trim().toLowerCase(), password });
         localStorage.setItem('userInfo', JSON.stringify(user));
         setUserInfo(user);
+        return user;
     };
 
-    const logout = () => {
+    const register = async (name, email, password) => {
+        const user = await registerUser({
+            name: name.trim(),
+            email: email.trim().toLowerCase(),
+            password,
+        });
+        localStorage.setItem('userInfo', JSON.stringify(user));
+        setUserInfo(user);
+        return user;
+    };
+
+    const logout = async () => {
+        try {
+            await logoutUser();
+        } catch (error) {
+            // Local logout should still work if the server is unavailable.
+        }
+
         localStorage.removeItem('userInfo');
         setUserInfo(null);
     };
@@ -30,6 +43,7 @@ export const AuthProvider = ({ children }) => {
     const value = useMemo(() => ({
         userInfo,
         login,
+        register,
         logout,
     }), [userInfo]);
 

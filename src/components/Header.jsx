@@ -7,10 +7,10 @@ const Header = () => {
     const navigate = useNavigate();
     const { userInfo, logout } = useAuth();
     const { itemsCount } = useCart();
-    const isAdmin = userInfo?.role === 'administrator';
+    const isAdmin = userInfo?.isAdmin || userInfo?.role === 'administrator';
 
-    const logoutHandler = () => {
-        logout();
+    const logoutHandler = async () => {
+        await logout();
         navigate('/');
     };
 
@@ -51,7 +51,10 @@ const Header = () => {
                                 </Nav.Link>
                             </>
                         ) : (
-                            <Nav.Link as={Link} to="/login">Login</Nav.Link>
+                            <>
+                                <Nav.Link as={Link} to="/login">Login</Nav.Link>
+                                <Nav.Link as={Link} to="/register">Registracija</Nav.Link>
+                            </>
                         )}
                     </Nav>
                 </Navbar.Collapse>
